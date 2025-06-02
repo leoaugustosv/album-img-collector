@@ -2,7 +2,9 @@
 env/
 venv/
 mp3/
-pytester.py
+pytester*
+*.js
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

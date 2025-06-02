@@ -1,11 +1,13 @@
 
 from io import BytesIO
+import json
 import os
 import mutagen as mtg
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, error
 import requests
 from PIL import Image, ImageTk
+from utils.params.params import *
 
 def get_audio_files_from_path(path:str, supported_audio_types:list):
     list_directory = os.listdir(path)
@@ -41,50 +43,27 @@ def delete_id3_cover(audiopath):
 
 
 
-def update_id3_cover_from_req(audiopath, img_url):
-    if img_url.split(".")[-1] == "png":
-        detected_mime = "image/png"
-    elif img_url.split(".")[-1] in ("jpg","jpeg"):
-        detected_mime = "image/jpeg"
+def get_mimetype_from_url(img_url):
+    extension_from_url = img_url.split(".")[-1][:4]
+    detected_mime = ""
+    if extension_from_url not in SUPPORTED_IMG_TYPES:
+        detected_mime = requests.get(img_url).headers.get('Content-Type', {})
+        if not detected_mime:
+            detected_mime = ""
     else:
-        print(f"ERROR: {img_url} file format unsupported. Please use .png or .jpg image files.")
-        return
-    
-    try:
-        img = response_to_img(img_url)
-        audio_file = mtg.File(audiopath).add(
-            APIC(
-                encoding=3, # 3 = utf-8
-                mime=detected_mime,
-                type=3, # cover image
-                desc=u'Cover updated by ALBUM-IMG-COLLECTOR',
-                data=img.read()
-            )
-        )
-        audio_file.save()
-    except Exception as e:
-        print(f"ERROR: Unable to update cover - {e}")
+        if extension_from_url == "png":
+            detected_mime = "image/png"
+        elif extension_from_url in ("jpg","jpeg"):
+            detected_mime = "image/jpeg"
+        
+    return detected_mime
 
-# def add_image_to_id3(id3_instance, img, detected_mime, audio_path):
-#     id3_instance.add(
-#                 APIC(
-#                     encoding=3, # utf-8
-#                     mime=detected_mime,
-#                     type=3, # Front cover
-#                     desc='FRONT_COVER',
-#                     data=img.read()
-#                 )
-#             )
-#     id3_instance.save(audio_path, v2_version=3)
-#     print(f"New cover added to {audio_path} succesfully.")
+
 
 def add_image_to_id3(img_url, audio_path):
-    if img_url.split(".")[-1] == "png":
-        detected_mime = "image/png"
-    elif img_url.split(".")[-1] in ("jpg","jpeg"):
-        detected_mime = "image/jpeg"
-    else:
-        print(f"ERROR: {img_url} file format unsupported. Please use .png or .jpg image files.")
+    detected_mime = get_mimetype_from_url(img_url)
+    if not detected_mime:
+        print(f"ERROR: {img_url} - unable to determine file format/mimetype.")
         return
     
     try:
@@ -94,7 +73,7 @@ def add_image_to_id3(img_url, audio_path):
             audio_id3.delall("APIC")
         except:
             audio_id3 = ID3()
-        # audio_id3.save(audio_path)
+
         audio_id3.add(
                     APIC(
                         encoding=3, # utf-8
@@ -121,3 +100,17 @@ def prompt_user_opt(prompt):
     while option.upper() not in ("Y","N"):
         option = input(prompt).strip()
     return option.upper()
+
+def center_crop_image(img):
+    width, height = img.size
+    new_width, new_height = height, height
+
+    left = (width - new_width) // 2
+    top = (height - new_height) // 2
+    right = left + new_width
+    bottom = top + new_height
+
+    cropped_img = img.crop((left, top, right, bottom))
+    return cropped_img
+
+

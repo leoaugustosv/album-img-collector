@@ -8,6 +8,7 @@ from io import BytesIO
 from utils.libs.general import *
 from utils.params.params import *
 import utils.providers.soundcloud as sc
+import utils.providers.youtube_music as ytm
 import utils.libs.selenium as se
 
 
@@ -163,6 +164,9 @@ def init_window():
         if selected_provider_index == 1:
             for img in sc.soundcloud_main(BROWSER, user_path.get(), get_selected_file_name()):
                 FETCHED_IMGS.append(img)
+        elif selected_provider_index == 2:
+            for img in ytm.youtube_music_main(BROWSER, user_path.get(), get_selected_file_name()):
+                FETCHED_IMGS.append(img)
 
         if FETCHED_IMGS:
             btn_selectimg.grid(sticky="ew", padx=10, pady=5, row=1, column=2)
@@ -205,7 +209,7 @@ def init_window():
         # List Images
         enumerated_imgs = enumerate(FETCHED_IMGS)
         for i, data in enumerated_imgs:
-            label_info = f'{data.get("position")})\nUSER: {data.get("username")}\nTRACK NAME: {data.get("name")}'
+            label_info = f'{data.get("position")})\nUSER/ARTIST: {data.get("username")}\nTRACK NAME: {data.get("name")}'
             cover_url = data["cover_img"]
             track_url = data["url"]
             img = Image.open(response_to_img(cover_url)).resize((100, 100))
@@ -285,7 +289,7 @@ def init_window():
     lbl_album_name_tag = tk.Label(frm_tags, anchor="w", justify="left", text=f"Album Name: - ")
 
     rdb_soundcloud = tk.Radiobutton(frm_providers, text="SoundCloud", variable=selected_provider, value=1)
-    rdb_youtube = tk.Radiobutton(frm_providers, text="YouTube", variable=selected_provider, value=2)
+    rdb_youtube = tk.Radiobutton(frm_providers, text="YouTube Music", variable=selected_provider, value=2)
     btn_search = tk.Button(frm_providers, text="Search Art", command=search_provider, state="disabled")
     btn_delcover = tk.Button(frm_providers, text="Clear Art", command=clear_cover, state="disabled")
     btn_selectimg = tk.Button(frm_providers, text="Change Art", command=open_selection_window)
