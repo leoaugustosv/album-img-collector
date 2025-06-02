@@ -8,7 +8,9 @@
 ## Providers
 
 - SoundCloud (OK) ✅
-- YouTube (WIP) ⏳
+- YouTube Music (OK) ✅
+- Beatport (OK) ✅
+- Bandcamp (WIP) ⏳
 
 ## Requirements:
 

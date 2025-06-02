@@ -9,6 +9,7 @@ from utils.libs.general import *
 from utils.params.params import *
 import utils.providers.soundcloud as sc
 import utils.providers.youtube_music as ytm
+import utils.providers.beatport as bp
 import utils.libs.selenium as se
 
 
@@ -58,6 +59,7 @@ def init_window():
 
         rdb_soundcloud.grid(sticky='ew', row=0, column=0)
         rdb_youtube.grid(sticky='ew', row=0, column=1)
+        rdb_beatport.grid(sticky='ew', row=0, column=2)
         btn_search.grid(sticky="ew", padx=10, pady=5, row=1, column=0)
         btn_delcover.grid(sticky="ew", padx=10, pady=5, row=1, column=1)
         btn_selectimg.grid_forget()
@@ -166,6 +168,9 @@ def init_window():
                 FETCHED_IMGS.append(img)
         elif selected_provider_index == 2:
             for img in ytm.youtube_music_main(BROWSER, user_path.get(), get_selected_file_name()):
+                FETCHED_IMGS.append(img)
+        elif selected_provider_index == 3:
+            for img in bp.beatport_main(BROWSER, user_path.get(), get_selected_file_name()):
                 FETCHED_IMGS.append(img)
 
         if FETCHED_IMGS:
@@ -290,6 +295,7 @@ def init_window():
 
     rdb_soundcloud = tk.Radiobutton(frm_providers, text="SoundCloud", variable=selected_provider, value=1)
     rdb_youtube = tk.Radiobutton(frm_providers, text="YouTube Music", variable=selected_provider, value=2)
+    rdb_beatport = tk.Radiobutton(frm_providers, text="Beatport", variable=selected_provider, value=3)
     btn_search = tk.Button(frm_providers, text="Search Art", command=search_provider, state="disabled")
     btn_delcover = tk.Button(frm_providers, text="Clear Art", command=clear_cover, state="disabled")
     btn_selectimg = tk.Button(frm_providers, text="Change Art", command=open_selection_window)
