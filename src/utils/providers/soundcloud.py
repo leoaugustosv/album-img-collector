@@ -29,7 +29,7 @@ def get_sc_client_id(browser=None, url="https://soundcloud.com/"):
     return client_id
 
 
-def get_request_body(url):
+def get_request_body(url, headers):
     body = ""
     max_tries = 8
     counter = 1
@@ -37,7 +37,7 @@ def get_request_body(url):
     while (not body or body == '{}') and counter <= max_tries:
         print(f"FAIL: Failed to get search results. Trying again... ({counter}/{max_tries})")
         time.sleep(2)
-        body = requests.get(url).text
+        body = requests.get(url, headers=headers).text
         counter += 1
     
     return body
@@ -63,7 +63,13 @@ def search_soundcloud(browser, client_id, search_str, limit:int = 10, offset:int
         else:
             search_str = urllib.parse.quote(search_str)
             api_url = f"https://api-v2.soundcloud.com/search/tracks?q={search_str}&client_id={client_id}&limit={limit}&offset={offset}"
-            body = get_request_body(api_url)
+            user_agent = browser.execute_script("return navigator.userAgent;")
+            headers = {
+                "Host": "api-v2.soundcloud.com",
+                "User-Agent": user_agent
+            }
+
+            body = get_request_body(api_url, headers=headers)
 
             if (not body or body == '{}'):
                 print("FAIL: Unable to get search results. Try again in a few seconds.")
